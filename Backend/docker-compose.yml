@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+  corona-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: nodejs
+    container_name: corona-backend
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "80:8080"
+    volumes:
+      - .:/home/node/app
+      - node_modules:/home/node/app/node_modules
+    networks:
+      - app-network
+    command: ./docker/wait-for.sh mongodb:27017 -- /home/node/app/node_modules/.bin/nodemon app.js
+
+  mongodb:
+    image: mongo:latest
+    env_file: .env
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - app-network
+
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  node_modules:
+  mongodb_data:
